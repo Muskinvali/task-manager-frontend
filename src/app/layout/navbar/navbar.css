@@ -1,0 +1,24 @@
+.navbar{
+    height:70px;
+    background:#1976d2;
+    color:white;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 25px;
+}
+
+.right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}

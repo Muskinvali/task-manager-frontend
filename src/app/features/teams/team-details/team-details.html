@@ -1,0 +1,138 @@
+<div class="team-shell">
+  <aside class="sidebar" aria-label="Primary navigation">
+    <a class="sidebar-brand" routerLink="/dashboard"><span class="brand-mark">TM</span><span>Task Manager</span></a>
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard"><span class="nav-icon">⌂</span> Dashboard</a>
+      <a routerLink="/tasks"><span class="nav-icon">☷</span> Tasks</a>
+      <a class="active" routerLink="/teams" aria-current="page"><span class="nav-icon">♟</span> Team</a>
+      <a routerLink="/dashboard"><span class="nav-icon">▤</span> Reports</a>
+      <a routerLink="/dashboard"><span class="nav-icon">⚙</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer"><span class="user-avatar">M</span><div><strong>Muskin</strong><small>Administrator</small></div></div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar"><div><p class="breadcrumb"><a routerLink="/teams">Workspace / Teams</a> / {{ team?.name || 'Team' }}</p><h1>Team Management</h1></div><a class="topbar-link" routerLink="/teams">All teams</a></header>
+    @if (loading) {
+      <div class="loading-state" role="status"><span class="spinner"></span>Loading team information…</div>
+    } @else if (errorMessage && !team) {
+      <div class="notice error-notice" role="alert"><span>{{ errorMessage }}</span><button type="button" (click)="loadTeam()">Try again</button></div>
+    } @else if (team) {
+      <section class="page-intro">
+        <div><p class="eyebrow">{{ team.teamKey }} · {{ team.status || 'ACTIVE' }}</p><h2>{{ team.name }}</h2><p>{{ team.description || 'No team description has been added.' }}</p></div>
+        <button class="primary-button" type="button" (click)="setTab('members')">View Members</button>
+      </section>
+      @if (notification) { <p class="notice success-notice" role="status">{{ notification }}</p> }
+      @if (errorMessage) { <p class="notice error-notice" role="alert">{{ errorMessage }}</p> }
+
+      <nav class="tabs" aria-label="Team sections">
+        <button type="button" [class.selected]="activeTab === 'overview'" (click)="setTab('overview')">Overview</button>
+        <button type="button" [class.selected]="activeTab === 'members'" (click)="setTab('members')">Members <span>{{ statistics?.totalMembers ?? members.length }}</span></button>
+        <button type="button" [class.selected]="activeTab === 'projects'" (click)="setTab('projects')">Projects</button>
+        <button type="button" [class.selected]="activeTab === 'settings'" (click)="setTab('settings')">Settings</button>
+      </nav>
+
+      @if (activeTab === 'overview') {
+        <section class="content-panel">
+          <div class="panel-heading"><div><h2>Team overview</h2><p>Current team composition and workload.</p></div></div>
+          <div class="overview-grid">
+            <article class="overview-card"><span>Team lead</span><strong>{{ team.teamLeadName || 'Not provided by API' }}</strong></article>
+            <article class="overview-card"><span>Members</span><strong>{{ statistics?.totalMembers ?? members.length }}</strong></article>
+            <article class="overview-card"><span>Active members</span><strong>{{ statistics?.activeMembers ?? '—' }}</strong></article>
+            <article class="overview-card"><span>Projects</span><strong>{{ statistics?.totalProjects ?? '—' }}</strong></article>
+            <article class="overview-card"><span>Total tasks</span><strong>{{ statistics?.totalTasks ?? '—' }}</strong></article>
+            <article class="overview-card"><span>Completed tasks</span><strong>{{ statistics?.completedTasks ?? '—' }}</strong></article>
+            <article class="overview-card"><span>Pending tasks</span><strong>{{ statistics?.pendingTasks ?? '—' }}</strong></article>
+            <article class="overview-card"><span>Created</span><strong>{{ team.createdAt | date:'mediumDate' }}</strong></article>
+          </div>
+          <div class="api-note"><strong>Member task assignments are not available yet.</strong><p>The documented team API provides team-level task totals, but no endpoint or response field links individual tasks to members.</p></div>
+        </section>
+      }
+
+      @if (activeTab === 'members') {
+        <section class="content-panel" aria-labelledby="members-title">
+          <div class="panel-heading"><div><h2 id="members-title">Team members</h2><p>Search, filter, and manage this team’s membership.</p></div><button class="primary-button" type="button" (click)="openAddMember()">＋ Add Member</button></div>
+          <div class="api-note compact-note"><strong>Assigned tasks per member are not provided by the current API contract.</strong><span>Team-wide task totals are available in Overview.</span></div>
+          <div class="member-toolbar">
+            <input #memberSearch type="search" aria-label="Search members" placeholder="Search name or email…" [value]="searchText" (input)="searchText = memberSearch.value; resetMemberPage()">
+            <select #memberRole aria-label="Filter by role" [value]="roleFilter" (change)="roleFilter = memberRole.value; resetMemberPage()"><option value="">All roles</option>@for (role of roles; track role) {<option [value]="role">{{ role }}</option>}</select>
+            <select #memberStatus aria-label="Filter by status" [value]="statusFilter" (change)="statusFilter = memberStatus.value; resetMemberPage()"><option value="">All statuses</option>@for (status of statuses; track status) {<option [value]="status">{{ status }}</option>}</select>
+            <button class="neutral-button" type="button" (click)="sortAscending = !sortAscending">Name {{ sortAscending ? '↑' : '↓' }}</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Assigned tasks</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+              <tbody>
+                @for (member of visibleMembers; track member.userId) {
+                  <tr>
+                    <td><button class="member-name" type="button" (click)="selectedMember = member"><span class="member-avatar">{{ memberInitials(member.name) }}</span>{{ member.name }}</button></td>
+                    <td>{{ member.email }}</td><td><span class="role-badge">{{ member.role }}</span></td><td class="unavailable">Not available</td>
+                    <td><span class="status-badge" [class.inactive]="member.status !== 'ACTIVE'">{{ member.status }}</span></td>
+                    <td>{{ member.joinedAt | date:'mediumDate' }}</td>
+                    <td class="actions-cell"><button type="button" (click)="openEditMember(member)">Edit</button><button class="danger-button" type="button" (click)="removeMember(member)">Remove</button></td>
+                  </tr>
+                } @empty {
+                  <tr><td class="empty-state" colspan="7"><strong>No members found</strong><span>Adjust the filters or add a member.</span></td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <nav class="pagination" aria-label="Member pages"><span>{{ filteredMembers.length }} members · Page {{ totalPages === 0 ? 0 : currentPage + 1 }} of {{ totalPages }}</span><div><button class="neutral-button" type="button" (click)="previousPage()" [disabled]="currentPage === 0">Previous</button><button class="neutral-button" type="button" (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages">Next</button></div></nav>
+        </section>
+      }
+
+      @if (activeTab === 'projects') {
+        <section class="content-panel"><div class="panel-heading"><div><h2>Team projects</h2><p>Project listing and management.</p></div></div><div class="empty-state"><strong>Project management is not connected</strong><span>No team project endpoints were included in the documented backend API.</span></div></section>
+      }
+
+      @if (activeTab === 'settings') {
+        <section class="content-panel settings-panel">
+          <div class="panel-heading"><div><h2>Team settings</h2><p>Update this team’s identifying information.</p></div></div>
+          <form [formGroup]="teamForm" (ngSubmit)="saveTeam()" class="settings-form">
+            <label class="form-field"><span>Team name</span><input type="text" formControlName="name" maxlength="80">@if (teamForm.controls.name.touched && teamForm.controls.name.invalid) {<small class="field-error">A valid team name is required.</small>}</label>
+            <label class="form-field"><span>Team key</span><input type="text" formControlName="teamKey" maxlength="12"><small>2–12 letters, numbers, underscores, or hyphens.</small>@if (teamForm.controls.teamKey.touched && teamForm.controls.teamKey.invalid) {<small class="field-error">Enter a valid team key.</small>}</label>
+            <label class="form-field"><span>Description</span><textarea rows="4" formControlName="description" maxlength="500"></textarea></label>
+            <div class="form-actions"><button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving…' : 'Save Changes' }}</button></div>
+          </form>
+          <div class="danger-zone"><div><strong>Delete team</strong><p>Remove this team from the workspace. The backend decides whether deletion is allowed.</p></div><button class="danger-button" type="button" (click)="archiveTeam()">Delete Team</button></div>
+        </section>
+      }
+    }
+  </main>
+</div>
+
+@if (showAddMember) {
+  <div class="dialog-backdrop" (click)="showAddMember = false">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-member-title" (click)="$event.stopPropagation()">
+      <div class="dialog-heading"><div><p class="eyebrow">Team membership</p><h2 id="add-member-title">Add member</h2></div><button class="icon-button" type="button" aria-label="Close" (click)="showAddMember = false">×</button></div>
+      <form [formGroup]="addMemberForm" (ngSubmit)="addMember()">
+        <label class="form-field"><span>Existing user ID</span><input type="number" min="1" formControlName="userId"><small>User-directory API is not available, so enter an existing user ID. No user account is created; the backend must validate the ID.</small></label>
+        <label class="form-field"><span>Role</span><select formControlName="role">@for (role of roles; track role) {<option [value]="role">{{ role }}</option>}</select></label>
+        <label class="form-field"><span>Status</span><select formControlName="status">@for (status of statuses; track status) {<option [value]="status">{{ status }}</option>}</select></label>
+        <div class="dialog-actions"><button class="neutral-button" type="button" (click)="showAddMember = false">Cancel</button><button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Adding…' : 'Add Member' }}</button></div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (editingMember) {
+  <div class="dialog-backdrop" (click)="editingMember = null">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="edit-member-title" (click)="$event.stopPropagation()">
+      <div class="dialog-heading"><div><p class="eyebrow">{{ editingMember.name }}</p><h2 id="edit-member-title">Update membership</h2></div><button class="icon-button" type="button" aria-label="Close" (click)="editingMember = null">×</button></div>
+      <form [formGroup]="memberForm" (ngSubmit)="updateMember()">
+        <label class="form-field"><span>Role</span><select formControlName="role">@for (role of roles; track role) {<option [value]="role">{{ role }}</option>}</select></label>
+        <label class="form-field"><span>Status</span><select formControlName="status">@for (status of statuses; track status) {<option [value]="status">{{ status }}</option>}</select></label>
+        <div class="dialog-actions"><button class="neutral-button" type="button" (click)="editingMember = null">Cancel</button><button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button></div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (selectedMember) {
+  <div class="dialog-backdrop" (click)="selectedMember = null">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="member-detail-title" (click)="$event.stopPropagation()">
+      <div class="dialog-heading"><div><p class="eyebrow">Member details</p><h2 id="member-detail-title">{{ selectedMember.name }}</h2></div><button class="icon-button" type="button" aria-label="Close" (click)="selectedMember = null">×</button></div>
+      <dl class="member-detail"><dt>Email</dt><dd>{{ selectedMember.email }}</dd><dt>Role</dt><dd>{{ selectedMember.role }}</dd><dt>Status</dt><dd>{{ selectedMember.status }}</dd><dt>Joined</dt><dd>{{ selectedMember.joinedAt | date:'mediumDate' }}</dd><dt>Assigned tasks</dt><dd>Not provided by the current API</dd></dl>
+    </section>
+  </div>
+}

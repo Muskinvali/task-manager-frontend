@@ -1,0 +1,61 @@
+:host {
+  --text: #172033;
+  --muted: #718096;
+  --primary: #5b4be7;
+  display: block;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 28px clamp(20px, 5vw, 78px);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f7f9fc;
+}
+
+button { font: inherit; cursor: pointer; }
+.dashboard-page { width: 100%; max-width: 1440px; margin: 0 auto; }
+.dashboard-header { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 18px 22px; border: 1px solid #e5e9f2; border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgb(15 23 42 / 5%); }
+.brand, .user-actions { display: flex; align-items: center; }
+.brand { gap: 13px; }
+.brand-mark { display: grid; width: 43px; height: 43px; place-items: center; border-radius: 12px; color: #fff; background: linear-gradient(140deg, #6a56f2, #4030b4); font-size: .86rem; font-weight: 800; letter-spacing: -.06em; }
+.eyebrow { margin: 0 0 5px; color: var(--primary); font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 0; font-size: 1.25rem; line-height: 1.2; letter-spacing: -.03em; }
+.user-actions { gap: 22px; }
+.tasks-button { padding: 10px 15px; border: 1px solid #e1ddff; border-radius: 9px; color: var(--primary); background: #fff; font-size: .84rem; font-weight: 700; transition: .18s ease; }
+.tasks-button:hover { color: #fff; background: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
+.user-copy { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.user-label { color: var(--muted); font-size: .73rem; }
+.user-copy strong { font-size: .9rem; }
+.logout-button { padding: 10px 15px; border: 1px solid #e6e2ff; border-radius: 9px; color: var(--primary); background: #f5f3ff; font-size: .84rem; font-weight: 700; transition: .18s ease; }
+.logout-button span { margin-right: 6px; font-size: 1rem; }
+.logout-button:hover { color: #fff; background: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
+
+.welcome-section { margin: 54px 0 27px; }
+.welcome-section h2 { margin: 0 0 8px; font-size: clamp(1.65rem, 3vw, 2.25rem); line-height: 1.15; letter-spacing: -.045em; }
+.welcome-section > p:last-child { margin: 0; color: var(--muted); }
+.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.summary-card { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 15px; min-height: 150px; padding: 25px; overflow: hidden; border: 1px solid transparent; border-radius: 16px; box-shadow: 0 10px 25px rgb(15 23 42 / 8%); }
+.summary-card::after { position: absolute; right: -28px; bottom: -38px; width: 120px; height: 120px; border-radius: 50%; background: rgb(255 255 255 / 12%); content: ""; }
+.summary-card-primary { color: #fff; background: linear-gradient(135deg, #5b4be7, #4535c1); }
+.summary-card-warning { color: #603d00; border-color: #f7dfaa; background: linear-gradient(135deg, #fff8e8, #fff1ca); }
+.summary-card-success { color: #155c3a; border-color: #bfe9d1; background: linear-gradient(135deg, #edfff5, #d9f7e7); }
+.card-icon { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 11px; color: currentColor; background: rgb(255 255 255 / 18%); font-size: 1.15rem; font-weight: 800; }
+.summary-card p { margin: 3px 0 6px; font-size: .82rem; font-weight: 700; opacity: .8; }
+.summary-card strong { font-size: 2.35rem; line-height: 1; letter-spacing: -.05em; }
+.card-note { position: absolute; bottom: 20px; left: 25px; color: currentColor; font-size: .75rem; opacity: .7; }
+
+@media (max-width: 700px) {
+  :host { padding: 16px; }
+  .dashboard-header { align-items: stretch; flex-direction: column; padding: 18px; }
+  .user-actions { justify-content: space-between; }
+  .tasks-button { margin-right: auto; }
+  .user-copy { align-items: flex-start; }
+  .welcome-section { margin: 36px 0 22px; }
+  .summary-grid { grid-template-columns: 1fr; gap: 14px; }
+  .summary-card { min-height: 125px; }
+}
+
+@media (min-width: 701px) and (max-width: 950px) {
+  .summary-grid { gap: 14px; }
+  .summary-card { padding: 20px; }
+}

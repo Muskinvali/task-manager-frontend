@@ -1,0 +1,96 @@
+:host {
+  --primary: #5b4be7;
+  --primary-dark: #4737c9;
+  --text: #172033;
+  --muted: #718096;
+  --border: #d9deea;
+  display: block;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 32px;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #eef1ff 0%, #f8fafc 48%, #f1edff 100%);
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.login-page {
+  display: grid;
+  min-height: calc(100vh - 64px);
+  place-items: center;
+}
+
+.login-card {
+  display: grid;
+  grid-template-columns: minmax(250px, .85fr) minmax(380px, 1.15fr);
+  width: min(100%, 920px);
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgb(54 43 116 / 16%), 0 4px 12px rgb(15 23 42 / 5%);
+}
+
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 38px;
+  color: #fff;
+  background: radial-gradient(circle at 15% 18%, rgb(255 255 255 / 18%), transparent 28%), linear-gradient(150deg, #5c4be7 0%, #38277c 55%, #17152e 100%);
+}
+
+.brand-mark {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 15px;
+  background: rgb(255 255 255 / 14%);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -.06em;
+}
+
+.login-brand span { font-size: 1rem; font-weight: 700; letter-spacing: .02em; }
+.login-content { display: flex; flex-direction: column; justify-content: center; padding: 56px clamp(34px, 6vw, 78px); }
+.login-heading { margin-bottom: 34px; }
+.eyebrow { margin: 0 0 10px; color: var(--primary); font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+h1 { margin: 0 0 12px; font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.12; letter-spacing: -.045em; }
+.login-subtitle { max-width: 38ch; margin: 0; color: var(--muted); line-height: 1.55; }
+
+form { display: grid; gap: 22px; }
+.form-field { display: grid; gap: 9px; }
+label { color: #354052; font-size: .86rem; font-weight: 700; }
+.field-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.forgot-password { padding: 0; border: 0; color: var(--primary); background: transparent; font-size: .76rem; }
+.forgot-password:hover { color: var(--primary-dark); text-decoration: underline; }
+input[type="email"], input[type="password"] { width: 100%; box-sizing: border-box; padding: 13px 14px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); background: #fff; transition: border-color .18s ease, box-shadow .18s ease; }
+input[type="email"]:focus, input[type="password"]:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgb(91 75 231 / 12%); outline: none; }
+input::placeholder { color: #a0aabc; }
+.remember-me { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: .8rem; font-weight: 500; }
+.remember-me input { width: 16px; height: 16px; accent-color: var(--primary); }
+.login-button { width: 100%; padding: 13px 18px; border: 0; border-radius: 10px; color: #fff; background: var(--primary); box-shadow: 0 8px 16px rgb(91 75 231 / 22%); font-weight: 700; transition: background .18s ease, transform .18s ease, box-shadow .18s ease; }
+.login-button:hover { background: var(--primary-dark); box-shadow: 0 10px 20px rgb(91 75 231 / 28%); transform: translateY(-1px); }
+.login-button:focus-visible, .forgot-password:focus-visible { outline: 3px solid rgb(91 75 231 / 22%); outline-offset: 3px; }
+.login-footer { margin: 30px 0 0; color: #98a2b3; font-size: .75rem; text-align: center; }
+
+@media (max-width: 700px) {
+  :host { padding: 16px; }
+  .login-page { min-height: calc(100vh - 32px); }
+  .login-card { display: block; min-height: auto; border-radius: 18px; }
+  .login-brand { min-height: 125px; padding: 24px; flex-direction: row; align-items: flex-start; }
+  .login-brand span { align-self: center; }
+  .login-content { padding: 34px 24px 30px; }
+  .login-heading { margin-bottom: 28px; }
+}
+
+@media (max-width: 380px) {
+  .login-brand { padding: 20px; }
+  .login-content { padding: 28px 18px 24px; }
+  .field-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
+}

@@ -1,0 +1,52 @@
+<main class="login-page">
+  <section class="login-card" aria-labelledby="login-title">
+    <div class="login-brand" aria-hidden="true">
+      <div class="brand-mark">TM</div>
+      <span>Task Manager</span>
+    </div>
+
+    <div class="login-content">
+      <div class="login-heading">
+        <p class="eyebrow">Welcome back</p>
+        <h1 id="login-title">Log in to your account</h1>
+        <p class="login-subtitle">Manage your tasks and keep your work moving forward.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <div class="form-field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            formControlName="email"
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-field">
+          <div class="field-heading">
+            <label for="password">Password</label>
+            <button class="forgot-password" type="button">Forgot password?</button>
+          </div>
+          <input
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <label class="remember-me">
+          <input type="checkbox" />
+          <span>Remember me</span>
+        </label>
+
+        <button class="login-button" type="submit">Log in</button>
+      </form>
+
+      <p class="login-footer">Secure access to your task workspace</p>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,84 @@
+<div class="team-shell">
+  <aside class="sidebar" aria-label="Primary navigation">
+    <a class="sidebar-brand" routerLink="/dashboard"><span class="brand-mark">TM</span><span>Task Manager</span></a>
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard"><span class="nav-icon">⌂</span> Dashboard</a>
+      <a routerLink="/tasks"><span class="nav-icon">☷</span> Tasks</a>
+      <a class="active" routerLink="/teams" aria-current="page"><span class="nav-icon">♟</span> Team</a>
+      <a routerLink="/dashboard"><span class="nav-icon">▤</span> Reports</a>
+      <a routerLink="/dashboard"><span class="nav-icon">⚙</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer"><span class="user-avatar">M</span><div><strong>Muskin</strong><small>Administrator</small></div></div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div><p class="breadcrumb">Workspace / Teams</p><h1>Team Management</h1></div>
+      <a class="topbar-link" routerLink="/tasks">Tasks</a>
+    </header>
+
+    <section class="page-intro">
+      <div><p class="eyebrow">Workspace directory</p><h2>Teams</h2><p>See team members, project activity, and task progress in one place.</p></div>
+      <button class="primary-button" type="button" (click)="openCreateForm()">＋ Create Team</button>
+    </section>
+
+    @if (notification) { <p class="notice success-notice" role="status">{{ notification }}</p> }
+    @if (errorMessage) { <div class="notice error-notice" role="alert"><span>{{ errorMessage }}</span><button type="button" (click)="loadTeams()">Try again</button></div> }
+
+    <section class="summary-grid" aria-label="Team summary">
+      <article class="summary-card"><span class="summary-icon blue">♟</span><div><span>Total Teams</span><strong>{{ teams.length }}</strong></div></article>
+      <article class="summary-card"><span class="summary-icon violet">◎</span><div><span>Total Members</span><strong>{{ totalMembers }}</strong></div></article>
+      <article class="summary-card"><span class="summary-icon green">✓</span><div><span>Active Members</span><strong>{{ activeMembers }}</strong></div></article>
+      <article class="summary-card"><span class="summary-icon blue">▤</span><div><span>Total Projects</span><strong>{{ totalProjects }}</strong></div></article>
+      <article class="summary-card"><span class="summary-icon violet">☷</span><div><span>Total Tasks</span><strong>{{ totalTasks }}</strong></div></article>
+      <article class="summary-card"><span class="summary-icon amber">◷</span><div><span>Pending Tasks</span><strong>{{ pendingTasks }}</strong></div></article>
+    </section>
+
+    <section class="directory-panel" aria-labelledby="directory-title">
+      <div class="panel-heading"><div><h2 id="directory-title">Team directory</h2><p>Choose a team to see its members and task information.</p></div><span class="count-pill">{{ teams.length }} teams</span></div>
+      @if (loading) {
+        <div class="loading-state" role="status"><span class="spinner"></span>Loading teams and statistics…</div>
+      } @else if (teams.length === 0 && !errorMessage) {
+        <div class="empty-state"><span class="empty-icon">♟</span><strong>No teams yet</strong><p>Create your first team to start organizing members and work.</p><button class="primary-button" type="button" (click)="openCreateForm()">Create Team</button></div>
+      } @else {
+        <div class="team-grid">
+          @for (team of teams; track team.id) {
+            <article class="team-card">
+              <div class="team-card-heading"><span class="team-avatar">{{ team.name.slice(0, 1).toUpperCase() }}</span><div><h3>{{ team.name }}</h3><span class="team-key">{{ team.teamKey }}</span></div><span class="status-badge" [class.archived]="team.status === 'ARCHIVED'">{{ team.status ?? 'ACTIVE' }}</span></div>
+              <p class="team-description">{{ team.description || 'No description provided.' }}</p>
+              <div class="team-lead"><span>Team lead</span><strong>{{ team.teamLeadName || 'Not provided by API' }}</strong></div>
+              @if (statisticsFor(team.id); as stats) {
+                <div class="team-metrics">
+                  <div><strong>{{ stats.totalMembers }}</strong><span>Members</span></div>
+                  <div><strong>{{ stats.totalProjects }}</strong><span>Projects</span></div>
+                  <div><strong>{{ stats.totalTasks }}</strong><span>Tasks</span></div>
+                  <div><strong>{{ stats.completedTasks }}</strong><span>Completed</span></div>
+                  <div><strong>{{ stats.pendingTasks }}</strong><span>Pending</span></div>
+                </div>
+              } @else {
+                <p class="metric-error">Team statistics are not available.</p>
+              }
+              <a class="team-link" [routerLink]="['/teams', team.id]">View team <span aria-hidden="true">→</span></a>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </main>
+</div>
+
+@if (showCreateForm) {
+  <div class="dialog-backdrop" (click)="cancelCreate()">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="create-team-title" (click)="$event.stopPropagation()">
+      <div class="dialog-heading"><div><p class="eyebrow">New workspace group</p><h2 id="create-team-title">Create team</h2></div><button class="icon-button" type="button" aria-label="Close" (click)="cancelCreate()">×</button></div>
+      <form [formGroup]="createTeamForm" (ngSubmit)="createTeam()">
+        @if (createError) { <p class="notice error-notice dialog-error" role="alert">{{ createError }}</p> }
+        <label class="form-field"><span>Team name <b>*</b></span><input type="text" formControlName="name" maxlength="80" placeholder="e.g. Development"><small class="field-error">@if (createTeamForm.controls.name.touched && createTeamForm.controls.name.hasError('required')) {A team name is required.} @else if (createTeamForm.controls.name.touched && createTeamForm.controls.name.hasError('maxlength')) {Team name must be 80 characters or fewer.}</small></label>
+        <label class="form-field"><span>Team key <b>*</b></span><input type="text" formControlName="teamKey" maxlength="12" placeholder="e.g. DEV"><small>2–12 letters, numbers, underscores, or hyphens. The backend enforces uniqueness.</small>@if (createTeamForm.controls.teamKey.touched && createTeamForm.controls.teamKey.invalid) {<small class="field-error">Enter a valid team key.</small>}</label>
+        <label class="form-field"><span>Description</span><textarea rows="3" formControlName="description" maxlength="500" placeholder="What does this team work on?"></textarea></label>
+        <p class="dialog-note">Team lead selection needs a user-directory API, which is not part of the documented backend endpoints.</p>
+        <div class="dialog-actions"><button class="neutral-button" type="button" (click)="cancelCreate()">Cancel</button><button class="primary-button" type="submit" [disabled]="submitting">{{ submitting ? 'Creating…' : 'Create Team' }}</button></div>
+      </form>
+    </section>
+  </div>
+}
